@@ -48,6 +48,19 @@ Kitaplar ve Üyeler tablolarını birbirine bağlayan, kütüphane hareketlerini
 
 ### A. İlişkisel Birleştirme (JOIN) Sorgusu
 Sistemde aktif olarak hangi kitabın hangi üye tarafından ödünç alındığını listelemek için `OduncAlma` tablosu merkez alınarak `Kitaplar` ve `Uyeler` tabloları **INNER JOIN** ile birleştirilmiştir. Ayrıca metin birleştirme (`||`) operatörü kullanılarak ad ve soyad tek bir kolon haline getirilmiştir:
+---
+
+## 4. Test Durumları (Test Cases)
+
+Sistemdeki fonksiyonların veri tutarlılığını ve iş mantığını doğru şekilde yürüttüğünü doğrulamak amacıyla aşağıdaki test senaryoları CLI (Komut Satırı) üzerinden simüle edilmiştir:
+
+| Test ID | Test Edilen Fonksiyon / Senaryo | Girdi (Input) | Beklenen Sonuç (Expected Output) | Durum (Status) |
+| :--- | :--- | :--- | :--- | :--- |
+| **TC-01** | Yeni Benzersiz Üye Kaydı | `ad="Rümeysa"`, `soyad="Görmez"`, `eposta="rumeysa@mail.com"` | Üye başarıyla eklendi uyarısı ve yeni bir ID üretilmesi. | **BAŞARILI** |
+| **TC-02** | Mükerrer E-posta Kontrolü (UNIQUE Constraint) | Aynı e-posta adresiyle (`rumeysa@mail.com`) ikinci bir üye kaydı denemesi. | `IntegrityError: UNIQUE constraint failed` uyarısının yakalanması ve kaydın reddedilmesi. | **BAŞARILI** |
+| **TC-03** | Geçerli Kitap Ödünç Verme & Stok Azaltma | Stok adedi `> 0` olan bir kitabın bir üyeye ödünç verilmesi. | `OduncAlma` tablosuna kayıt eklenmesi ve ilgili kitabın stok adedinin `1` azaltılması. | **BAŞARILI** |
+| **TC-04** | Stokta Olmayan Kitabın Ödünç Verilmesi | Stok adedi `0` olan bir kitabın ödünç verilmeye çalışılması. | Sistem tarafından "Bu kitap stokta yok" uyarısının basılması ve işlemin iptal edilmesi. | **BAŞARILI** |
+| **TC-05** | Kitap İade Etme (Teslim Tarihi Güncelleme) | Ödünç alınan bir kitabın geri getirilmesi. | `OduncAlma` tablosundaki `teslim_tarihi` alanının güncellenmesi ve kitap stoğunun `1` artırılması. | **BAŞARILI** |
 
 ```sql
 SELECT o.id, k.baslik, (u.ad || ' ' || u.soyad) AS uye_ad_soyad, o.odunc_tarihi 
